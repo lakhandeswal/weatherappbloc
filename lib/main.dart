@@ -111,7 +111,7 @@ class ShowData extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text("$cityName is"),
+            Text("$cityName"),
             Text(data.temp.toString()),
             SizedBox(
               height: 20.0,
