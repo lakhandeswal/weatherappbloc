@@ -12,9 +12,8 @@ class WeatherData extends Equatable {
   num get temp => temperature;
 
   factory WeatherData.fromJson(dynamic json) {
-    final consolidatedWeather = json['consolidated_weather'][0];
     return WeatherData(
-      temperature: consolidatedWeather[0]['the_temp'] as double,
+      temperature: json['temp'] as double,
     );
   }
 }
