@@ -8,9 +8,9 @@ import '../Models/WeatherData.dart';
 
 class BlocPattern extends Bloc<WeatherEvent, WeatherState> {
   BlocPattern(WeatherState initialState) : super(initialState);
-  //final _stateController = StreamController<String>();
-  // StreamSink<String> get stateSink => _stateController.sink;
-  // Stream<String> get stateStream => _stateController.stream;
+  final _stateController = StreamController<WeatherData>();
+  StreamSink<WeatherData> get stateSink => _stateController.sink;
+  Stream<WeatherData> get stateStream => _stateController.stream;
 
   @override
   // ignore: override_on_non_overriding_member
@@ -37,7 +37,7 @@ class BlocPattern extends Bloc<WeatherEvent, WeatherState> {
   Future<WeatherData> _fetchWeatherData(String cityName) async {
     //use api
     final result = await http.Client().get(Uri.parse(
-        'https://api.openweathermap.org/data/2.5/weather?q=$cityName&appid=d885aa1d783fd13a55050afeef620fcb'));
+        'https://api.openweathermap.org/data/2.5/weather?q=$cityName&appid=2fb9a05b8ad052cb8ef1250f68276e1e'));
     if (result.statusCode != 200) {
       throw Exception();
     } else {
@@ -49,6 +49,13 @@ class BlocPattern extends Bloc<WeatherEvent, WeatherState> {
   WeatherData parsedJson(final response) {
     final responseData = json.decode(response);
     final weatherData = responseData["main"];
+    print('WeatherData: ${weatherData["temp"]}');
+    _stateController.sink.add(WeatherData.fromJson(weatherData));
     return WeatherData.fromJson(weatherData);
+  }
+
+  @override
+  void dispose() {
+    _stateController.close();
   }
 }
