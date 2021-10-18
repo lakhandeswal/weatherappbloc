@@ -40,7 +40,12 @@ class _MainScreenState extends State<MainScreen> {
     final weatherBloc = BlocProvider.of<BlocPattern>(context);
     return Scaffold(
         appBar: AppBar(
-          title: Text('Bloc Pattern'),
+          centerTitle: true,
+          title: Text(
+            'Bloc Pattern',
+            style: TextStyle(color: Colors.black),
+          ),
+          backgroundColor: Colors.cyanAccent,
         ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -76,7 +81,7 @@ class _MainScreenState extends State<MainScreen> {
                               weatherBloc.add(
                                   GetWeatherData(cityName: controller.text));
                             },
-                            color: Colors.blue,
+                            color: Colors.cyanAccent,
                             child: Text("Search"),
                           )
                         ],
@@ -105,32 +110,105 @@ class ShowData extends StatelessWidget {
   const ShowData(this.data, this.cityName);
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text("$cityName"),
-            Text(data.temp.toString()),
-            SizedBox(
-              height: 20.0,
-            ),
-            Container(
-              height: 50.0,
-              width: double.infinity,
-              child: MaterialButton(
-                onPressed: () {
-                  // return to again notsearchingstate//
-                  BlocProvider.of<BlocPattern>(context).add(ResetWeatherData());
-                },
-                color: Colors.blue,
-                child: Text("search again"),
+    return Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(data.temp.toString()),
+              Container(
+                height: 50.0,
+                width: double.infinity,
+                child: MaterialButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => SubScreen(
+                          cityName: cityName,
+                          data: data,
+                        ),
+                      ),
+                    );
+                  },
+                  color: Colors.cyanAccent,
+                  child: Text("show city details"),
+                ),
               ),
-            )
-          ],
+              SizedBox(
+                height: 20.0,
+              ),
+              Container(
+                height: 50.0,
+                width: double.infinity,
+                child: MaterialButton(
+                  onPressed: () {
+                    // return to again notsearchingstate//
+                    BlocProvider.of<BlocPattern>(context)
+                        .add(ResetWeatherData());
+                  },
+                  color: Colors.cyanAccent,
+                  child: Text("search another city"),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
+  }
+}
+
+class SubScreen extends StatefulWidget {
+  final WeatherData data;
+  final String cityName;
+
+  SubScreen({required this.data, required this.cityName});
+
+  @override
+  _SubScreenState createState() => _SubScreenState();
+}
+
+class _SubScreenState extends State<SubScreen> {
+  final weatherBloc = BlocPattern(NotSearchingState());
+  int click = 1;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+        appBar: AppBar(
+          leading: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: Icon(
+                Icons.arrow_back_ios,
+                color: Colors.black,
+              )),
+          centerTitle: true,
+          backgroundColor: Colors.cyanAccent,
+          title: Text("${widget.cityName.toUpperCase()}",
+              style: TextStyle(color: Colors.black)),
+        ),
+        body: Center(
+            child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(widget.data.temp.toString()),
+            StreamBuilder(
+                stream: weatherBloc.stateStream,
+                builder: (context, snapshot) {
+                  return (snapshot.hasData)
+                      ? Text("New Data:" + snapshot.data.toString())
+                      : Text('----');
+                }),
+            MaterialButton(
+              child: Text('Fetch again'),
+              onPressed: () {
+                weatherBloc.add(GetWeatherData(cityName: widget.cityName));
+              },
+            )
+          ],
+        )));
   }
 }
